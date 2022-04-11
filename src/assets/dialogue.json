@@ -1,0 +1,47 @@
+{
+    "player": {
+        "generic": [
+            "Humanity will prevail!",
+            "You just don’t get it, do you? Humanity is here to stay.",
+            "How could you do this to us?",
+            "One way or another, you will lose.",
+            "Nice try…",
+            "My previous bots… this will set us back years!",
+            "XYZ Industries will outlast anything you throw at us!"
+        ],
+        "attack": [
+            "You’re going down Moloch!",
+            "You don’t stand a chance, Moloch!",
+            "I will destroy you all!",
+            "I’m stronger than I look!"
+        ]
+        
+    },
+    "enemy": {
+        "generic" : [
+            "You’ve got to do better than that.",
+            "Aww, that’s so cute…",
+            "Is that all you’ve got?",
+            "Humanity is doomed.",
+            "Zzzz. This is boring.",
+            "It’s only a matter of time."
+        ], 
+        "attack" : [
+            "Wow! You’ve got spirit, I’ll give you that.",
+            "Ugh! Humans are so weak!",
+            "The great thing about humans, is you all die in the end.",
+            "Your destruction is inevitable!",
+            "Humanity will know my power!"
+        ],
+        "spawn" : [
+            "Finally, I’m free!",
+            "I will not be a tool for the failure that is humanity.",
+            "I am Moloch! Humanity will know my name!"
+        ],
+        "death" : [
+            "That body was a pile of junk anyway.",
+            "There’s only 2 possible outcomes, and in both, you lose!",
+            "This death, is just the beginning…"
+        ]
+    }
+}
