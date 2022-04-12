@@ -1,13 +1,10 @@
 import Phaser from 'phaser';
 
-import flaresJson from '../assets/particles/flares.json';
+import { getPublicUrl } from '../assets/helpers';
 import { VIEWPORT_HEIGHT, VIEWPORT_WIDTH } from '../constants';
 import { getBoardContract, getOwnedAvatars, mintAvatar } from '../contractAbi';
 import { Address, Avatar, BoardMeta } from '../types';
 import { connect, web3Modal } from '../wallet';
-import flares from './assets/particles/flares.png';
-import sparklePng from './assets/particles/sparkle1.png'
-import scientist_game from './assets/sprites/scientist_game.png';
 
 const BUTTON_FRAMES = {
     INACTIVE: 'tiles/icons/target-yellow',
@@ -50,10 +47,10 @@ export class WalletScene extends Phaser.Scene {
     avatarButtonImage: Phaser.GameObjects.Image | null = null;
 
     preload() {
-        this.load.atlas('flares', flares, flaresJson);
-        this.load.image('spark', sparklePng);
-        this.load.image('scientist', scientist_game);
-        this.load.multiatlas('ui', 'assets/moloch.json', 'assets');
+        this.load.atlas('flares', getPublicUrl('/particles/flares.png'), getPublicUrl('/particles/flares.json'));
+        this.load.image('spark', getPublicUrl('/particles/sparkle1.png'));
+        this.load.image('scientist', getPublicUrl('/sprites/scientist_game.png'));
+        this.load.multiatlas('ui', getPublicUrl('/atlases/ui/moloch.json'), 'atlases/ui/');
     }
 
     create() {

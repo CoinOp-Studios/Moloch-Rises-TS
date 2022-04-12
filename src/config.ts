@@ -9,7 +9,7 @@ export const BOARD_CONTRACTS: AddressMap = {
 };
 
 export const GRAPH_ENDPOINTS: AddressMap = {
-  "0x13881": "https://api.thegraph.com/subgraphs/name/0xbeedao/all-mumbai-nfts"
+  "0x13881": "https://api.thegraph.com/subgraphs/name/0xbeedao/moloch-rises-subgraph"
 };
 
 export const USER_TOKEN_Q: string = `

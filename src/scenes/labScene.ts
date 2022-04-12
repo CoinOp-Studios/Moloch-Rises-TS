@@ -2,19 +2,15 @@ import EasyStar from 'easystarjs';
 //import { AbiCoder } from 'ethers/lib/utils';
 import Phaser from 'phaser';
 
-import { Enemy } from '../actors/enemy';
-import { Player } from '../actors/player';
-import * as dialogue from '../assets/dialogue.json';
-import tilemapCsv from "../assets/tilemaps/csv/lab1.csv";
+import Enemy from '../actors/enemy';
+import Player from '../actors/player';
+import dialogue from '../assets/dialogue.json';
+import { getPublicUrl } from '../assets/helpers';
 import * as constants from '../constants';
 import { NUM_ENEMIES, TILEHEIGHT, TILEWIDTH } from '../constants';
 import { completeBoard, startBoard } from '../contractAbi'
 import { BoardMeta } from '../types';
 import { VrfProvider } from '../vrfProvider';
-import damageSpritesheet from "./assets/animations/explosionSheet.png";
-import defaultEnemySpritesheet from "./assets/sprites/droids_sprite_64x64.png";
-import defaultPlayerSpritesheet from "./assets/sprites/scientist_game.png";
-import defaultTileset from "./assets/tilemaps/tiles/factory64x64.png";
 import { GameScene } from './gameScene';
 import { WalletScene } from './walletScene';
 
@@ -34,13 +30,13 @@ export class LabScene extends GameScene {
     //////////////// PHASER LIFECYLE //////////////////////////
 
     preload() {
-        this.load.image('tiles', defaultTileset);
-        this.load.tilemapCSV('map', tilemapCsv);
-        this.load.spritesheet('player', defaultPlayerSpritesheet, { frameWidth: TILEWIDTH, frameHeight: TILEHEIGHT });
+        this.load.image('tiles', getPublicUrl('/tilemaps/tiles/factory64x64.png'));
+        this.load.tilemapCSV('map', getPublicUrl('/tilemaps/csv/lab1.csv'));
+        this.load.spritesheet('player', getPublicUrl('/sprites/scientist_game.png'), { frameWidth: TILEWIDTH, frameHeight: TILEHEIGHT });
         for (let i = 0; i < NUM_ENEMIES; i++) {
             this.load.spritesheet(
                 'enemy_' + i,
-                defaultEnemySpritesheet,
+                getPublicUrl('/sprites/droids_sprite_64x64.png'),
                 {
                     frameWidth: ENEMY_SPRITE_SIZE_PX,
                     frameHeight: ENEMY_SPRITE_SIZE_PX,
@@ -49,7 +45,7 @@ export class LabScene extends GameScene {
                 }
             );
         }
-        this.load.spritesheet('damageSprites', damageSpritesheet, { frameWidth: 32, frameHeight: 32 });
+        this.load.spritesheet('damageSprites', getPublicUrl('/animations/explosionSheet.png'), { frameWidth: 32, frameHeight: 32 });
     }
 
     create() {
@@ -421,13 +417,13 @@ export class LabScene extends GameScene {
     /////////EMBELLISHMENTS/////////
     getEnemyConfig() {
         return {
-            "dialogue": dialogue["enemy"]
+            "dialogue": dialogue.enemy
         };
     }
 
     getPlayerConfig() {
         return {
-            "dialogue": dialogue["player"]
+            "dialogue": dialogue.player
         };
     }
 

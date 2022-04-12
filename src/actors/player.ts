@@ -1,8 +1,8 @@
 import { INPUT } from '../constants';
 import { Avatar, PlayerActor } from '../types';
-import { Character } from './character';
+import Character from './character';
 
-export class Player extends Character implements PlayerActor {
+export default class Player extends Character implements PlayerActor {
     update (input: number) {
         let x = this.tileX();
         let y = this.tileY();

@@ -4,7 +4,7 @@ import { Actor, Dialogs } from '../types';
 
 const { TILEHEIGHT, TILEWIDTH } = Constants;
 
-export abstract class Character extends Phaser.Physics.Arcade.Sprite implements Actor {
+export default abstract class Character extends Phaser.Physics.Arcade.Sprite implements Actor {
     soundDictionary: Dialogs = {move: [], attack: [], death: [], collide: []};
     dialogue: Dialogs = {spawn: [], death: [], generic: []};
     currentAnimations: Record<string, any> = {};

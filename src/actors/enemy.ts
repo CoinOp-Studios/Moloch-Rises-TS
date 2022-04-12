@@ -2,9 +2,9 @@ import Phaser from 'phaser';
 
 import { GameScene } from '../scenes/gameScene';
 import { BoardMeta, EnemyActor, MoveList, Position } from '../types';
-import { Character } from './character';
+import Character from './character';
 
-export class Enemy extends Character implements EnemyActor {
+export default class Enemy extends Character implements EnemyActor {
     pathfinder: any;
 
     constructor( scene: GameScene, 

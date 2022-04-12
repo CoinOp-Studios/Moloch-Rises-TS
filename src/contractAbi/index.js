@@ -2,10 +2,10 @@ import { ethers } from "ethers";
 import { parseEther } from "ethers/lib/utils";
 
 import { AVATAR_CONTRACTS, BOARD_CONTRACTS } from "../config";
+import { BLOCK_CONFIRMS } from "../constants";
 import { avatar } from './avatar';
 import { board } from './board';
 import { getTokens } from './queries';
-import { BLOCK_CONFIRMS } from "../constants";
 
 export async function getAvatarContract(provider) {
   const network = await provider.getNetwork();
@@ -45,28 +45,28 @@ export async function startBoard(provider, boardContract, avatarId) {
 
   // perform call before transaction to check for errors
   await boardContract.callStatic.start(avatarId, {
-      value: gwei
+    value: gwei
   }).then((result) => {
-      console.log("contract start call ok: ", result);
+    console.log("contract start call ok: ", result);
   }, (error) => {
-      console.log("error in start call: ", error);
-      // don't attempt tx if call fails
-      // TODO:
-      //  check if avatar is currently in-game
-      //  end game if avatar is already in game?
-      throw error;
+    console.log("error in start call: ", error);
+    // don't attempt tx if call fails
+    // TODO:
+    //  check if avatar is currently in-game
+    //  end game if avatar is already in game?
+    throw error;
   });
 
   if (!waitingForStartBoard) {
     waitingForStartBoard = true;
     const tx = await boardContract.connect(signer).start(avatarId, {
-        value: gwei
+      value: gwei
     });
     var rc = await tx.wait(BLOCK_CONFIRMS);
     console.log("game started on-chain for avatar %d in tx ", avatarId, rc);
-      
+
     // retrieve game data for this avatar
-    const gameId = boardContract.avatarGame(avararId);
+    const gameId = boardContract.avatarGame(avatarId);
     waitingForStartBoard = false;
     return [gameId, boardContract.gameInfo(gameId)];
   }
@@ -83,7 +83,7 @@ export async function completeBoard(provider, boardContract, gameId, gameData) {
       throw error;
     });
 
-  if(!waitingForCompleteBoard) {
+  if (!waitingForCompleteBoard) {
     waitingForCompleteBoard = true;
     var tx = await boardContract.connect(signer).complete(gameId, gameData);
     var rc = await tx.wait(BLOCK_CONFIRMS);
