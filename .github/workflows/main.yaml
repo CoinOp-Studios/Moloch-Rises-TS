@@ -1,22 +1,46 @@
-- name: Deploy-site
-  uses: alinz/ssh-scp-action@master
-  env:
-    WWW: /var/www/coinopstudios/molochrises
-  with:
-    key: ${{ secrets.SSH_KEY }}
-    host: mytx.io
-    port: 22
-    user: deployer
-    # runs this on remote server
-    ssh_before: |
-      test -d ${WWW} && mv ${WWW}-`date +%Y%m%d-%H%M`
-      mkdir -p ${WWW}
+name: Deploy to CoinOp Site
+on:
+  push:
+    branches:
+      - main
 
-    # then uploads these 2 files
-    scp: |
-      build/* deploy@mytx.io:${WWW}/
+jobs:
+  deploy:
+    name: Deploy
+    runs-on: ubuntu-latest
+    environment: production
+    strategy:
+      matrix:
+        node-version: ['14']
+    steps:
+      - uses: actions/checkout@v1
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v1
+        with:
+          node-version: ${{ matrix.node-version }}
+      - run: yarn install
+      - run: yarn build
+      - name: Package
+        run: tar czf site.tar.gz build
+      - name: Deploy
+        uses: alinz/ssh-scp-action@master
+        env:
+          WWW: /var/www/coinopstudios/molochrises
+        with:
+          key: ${{ secrets.SSH_KEY }}
+          host: mytx.io
+          port: 22
+          user: deployer
+          # runs this on remote server
+          ssh_before: |
+            test -d ${WWW} && mv ${WWW} ${WWW}-`date +%Y%m%d-%H%M`
 
-    # then run these commands
-    ssh_after: |
-      echo "Complete!"
-      find ${WWW} -type f
+          # then uploads these files
+          scp: |
+            site.tar.gz deploy@mytx.io:site.tar.gz
+
+          # then run these commands
+          ssh_after: |
+            mkdir -p ${WWW}
+            cd ${WWW}
+            tar xzf ~/site.tar.gz --strip 1
