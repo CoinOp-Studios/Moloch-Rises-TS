@@ -33,7 +33,9 @@ jobs:
           user: deployer
           # runs this on remote server
           ssh_before: |
-            test -d ${WWW} && mv ${WWW} ${WWW}-`date +%Y%m%d-%H%M`
+            echo "Deploying on ${HOSTNAME} site"
+            echo -x
+            test -d ${WWW} && mv ${WWW} ${WWW}-arc-`date +%Y%m%d-%H%M`
 
           # then uploads these files
           scp: |
