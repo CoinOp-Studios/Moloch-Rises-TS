@@ -41,6 +41,8 @@ jobs:
 
           # then run these commands
           ssh_after: |
+            touch ${WWW}
+            mv ${WWW} ${WWW}-`date +%Y%m%d-%H%M`
             mkdir -p ${WWW}
             cd ${WWW}
-            tar xzf ~/site.tar.gz --strip 1
+            tar xzf /home/deploy/site.tar.gz --strip 1
