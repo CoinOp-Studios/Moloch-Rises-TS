@@ -30,7 +30,7 @@ jobs:
           key: ${{ secrets.SSH_KEY }}
           host: mytx.io
           port: 22
-          user: deployer
+          user: deploy
           # runs this on remote server
           ssh_before: |
             echo "Deploying on ${HOSTNAME} site"
