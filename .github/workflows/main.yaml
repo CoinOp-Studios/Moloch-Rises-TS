@@ -1,0 +1,22 @@
+- name: Deploy to CoinOpStudios.xyz
+  uses: alinz/ssh-scp-action@master
+  env:
+    WWW: /var/www/coinopstudios/molochrises
+  with:
+    key: ${{ secrets.SSH_KEY }}
+    host: mytx.io
+    port: 22
+    user: deployer
+    # runs this on remote server
+    ssh_before: |
+      test -d ${WWW} && mv ${WWW}-`date +%Y%m%d-%H%M`
+      mkdir -p ${WWW}
+
+    # then uploads these 2 files
+    scp: |
+      build/* deploy@mytx.io:${WWW}/
+
+    # then run these commands
+    ssh_after: |
+      echo "Complete!"
+      find ${WWW} -type f
