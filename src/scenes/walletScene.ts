@@ -50,7 +50,7 @@ export class WalletScene extends Phaser.Scene {
         this.load.atlas('flares', getPublicUrl('/particles/flares.png'), getPublicUrl('/particles/flares.json'));
         this.load.image('spark', getPublicUrl('/particles/sparkle1.png'));
         this.load.image('scientist', getPublicUrl('/sprites/scientist_game.png'));
-        this.load.multiatlas('ui', getPublicUrl('/atlases/ui/moloch.json'), 'atlases/ui/');
+        this.load.multiatlas('ui', getPublicUrl('/atlases/ui/moloch.json'), getPublicUrl('/atlases/ui/'));
     }
 
     create() {
