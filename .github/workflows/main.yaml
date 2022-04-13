@@ -31,9 +31,13 @@ jobs:
           host: mytx.io
           port: 22
           user: deployer
+          # runs this on remote server
+          ssh_before: |
+            echo "Deploying on ${HOSTNAME} site"
+
           # then uploads these files
           scp: |
-            site.tar.gz deploy@mytx.io:site.tar.gz
+            site.tar.gz deploy@mytx.io:
 
           # then run these commands
           ssh_after: |
