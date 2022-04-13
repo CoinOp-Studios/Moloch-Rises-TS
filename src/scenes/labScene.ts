@@ -18,9 +18,9 @@ const GAME_MODE = Object.freeze({ OFFLINE: 1, ONLINE:2 });
 const COLLISION_INDEX_START = 54;
 const COLLISION_INDEX_END = 83;
 const ENEMY_SPRITE_SIZE_PX = 64;
-const WALKABLE_RANGES = [
+/* const WALKABLE_RANGES = [
     [1, 3], [26, 28], [51, 53], [76, 78], [101, 103], [126, 128], [183, 185], [189, 200]
-];
+]; */
 const COLLIDING_RANGES = [
     [4, 25], [29, 50], [54, 75], [79, 100], [104, 125], [129, 182], [186, 188]
 ];

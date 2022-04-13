@@ -1,7 +1,7 @@
 import Crypto from 'crypto-js';
 import { gql, request } from 'graphql-request';
 
-import { GRAPH_ENDPOINTS, USER_TOKEN_Q } from '../config';
+import { GRAPH_ENDPOINTS } from '../config';
 
 export function base64ToJSON(bytes) {
   const str = Crypto.enc.Base64.parse(bytes).toString(Crypto.enc.Utf8);
