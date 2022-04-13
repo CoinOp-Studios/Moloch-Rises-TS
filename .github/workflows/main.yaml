@@ -1,4 +1,4 @@
-- name: Deploy to CoinOpStudios.xyz
+- name: Deploy-site
   uses: alinz/ssh-scp-action@master
   env:
     WWW: /var/www/coinopstudios/molochrises
