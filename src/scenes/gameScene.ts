@@ -34,13 +34,7 @@ export class GameScene extends Phaser.Scene {
   minInputDelayMs = 50;
   keyPressedLastTick = false;
 
-  // on-chain state
-  avatar: Avatar | null = null;
-  board: BoardMeta = { maxTurns: 0 };
   currentGame = null;
-
-  // web3 provider
-  provider = null;
 
   // game objects with collision which need to
   // check for one another

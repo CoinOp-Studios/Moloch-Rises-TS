@@ -3,6 +3,7 @@ import Phaser from 'phaser';
 import { getPublicUrl } from '../assets/helpers';
 import { VIEWPORT_HEIGHT, VIEWPORT_WIDTH } from '../constants';
 import { getBoardContract, getOwnedAvatars, mintAvatar } from '../contractAbi';
+import gameState from '../gameState';
 import { Address, Avatar, BoardMeta } from '../types';
 import { connect, web3Modal } from '../wallet';
 
@@ -18,6 +19,28 @@ const BUTTON_FRAMES = {
 const BAR_SCALE = 0.8;
 
 console.log(`BUTTON_FRAMES: ${JSON.stringify(BUTTON_FRAMES)}`);
+
+const addAvatar = (avatar: Avatar, index: number, setAvatar: (avatar: any, index: number) => void) => {
+    console.log('addAvatar', avatar, index);
+    const raw = JSON.stringify(avatar);
+    const avatars = gameState.getAvatars();
+    const ix = avatars.findIndex(a => JSON.stringify(a) === raw);
+    if (ix === -1) {
+        console.log('added avatar', avatar);
+        const avatarsElt = document.getElementById("avatar-list");
+        avatars.push(avatar);
+        const key = `avatar-${avatar.id}`;
+        if (!document.getElementById(key)) {
+            const choice = makeAvatarChoice(avatar, index, key, setAvatar);
+            console.log('adding', choice);
+            avatarsElt?.appendChild(choice);
+        }
+    } else {
+        console.log('updated avatar', avatar);
+        avatars[ix] = avatar;
+    }
+    gameState.setAvatars(avatars);
+};
 
 const makeAvatarChoice = (avatar: any, index: number, key: string, callback: (avatar: any, index: number) => void) => {
     const choice = document.createElement('li');
@@ -36,15 +59,6 @@ export class WalletScene extends Phaser.Scene {
     emitters: Record<string, Phaser.GameObjects.Particles.ParticleEmitter> = {};
     sprites: Record<string, Phaser.GameObjects.Sprite> = {};
     texts: Record<string, Phaser.GameObjects.Text> = {};
-    provider: any | null = null;
-    connected: boolean = false;
-    offline: boolean = false;
-    retrievingBoardState = false;
-    account = '';
-    avatars: Avatar[] = [];
-    currentAvatar: Avatar | null = null;
-    board: BoardMeta = { maxTurns: 50 };
-    avatarButtonImage: Phaser.GameObjects.Image | null = null;
 
     preload() {
         this.load.atlas('flares', getPublicUrl('/particles/flares.png'), getPublicUrl('/particles/flares.json'));
@@ -67,8 +81,8 @@ export class WalletScene extends Phaser.Scene {
         const playerX = VIEWPORT_WIDTH / 3 * 1.05;
         const playerButton = this.add.sprite(playerX, 8, 'ui', BUTTON_FRAMES.PLAYER_INACTIVE);
         playerButton.setScale(0.5);
-        const infoBar = this.add.sprite(0, 0, 'ui', 'tiles/hud/info');
-        infoBar.setPosition((VIEWPORT_WIDTH - infoBar.width) / 2, (VIEWPORT_HEIGHT - infoBar.height) / 2);
+        // const infoBar = this.add.sprite(0, 0, 'ui', 'tiles/hud/info');
+        // infoBar.setPosition((VIEWPORT_WIDTH - infoBar.width) / 2, (VIEWPORT_HEIGHT - infoBar.height) / 2);
         const offlineButton = this.add.sprite(25, 60, 'ui', 'tiles/buttons/close-gray');
         offlineButton.setScale(0.45);
 
@@ -149,10 +163,11 @@ export class WalletScene extends Phaser.Scene {
     }
 
     mintAvatarForUser() {
-        this.provider.listAccounts().then((network: any) => {
+        const provider = gameState.getProvider();
+        provider.listAccounts().then((network: any) => {
             const account = network[0];
-            mintAvatar(this.provider, account).then(() => {
-                this.updateOwnedAvatars(this.provider, account);
+            mintAvatar(provider, account).then(() => {
+                this.updateOwnedAvatars(provider, account);
             });
         });
     }
@@ -184,7 +199,7 @@ export class WalletScene extends Phaser.Scene {
 
     async onClick(button: Phaser.GameObjects.Sprite) {
         this.destroyTooltip();
-        if (this.connected) {
+        if (gameState.isConnected()) {
             this.disconnectWallet();
             return;
         }
@@ -200,11 +215,12 @@ export class WalletScene extends Phaser.Scene {
     }
 
     onPlayerClick(button: Phaser.GameObjects.Sprite) {
+        console.log('onPlayerClick');
         this.emitters.player.stop();
         this.destroyTooltip();
-        if (this.currentAvatar) {
-            this.currentAvatar = null;
-            this.updateConnectionStatus(this.provider);
+        if (gameState.getCurrentAvatar()) {
+            gameState.setCurrentAvatar(null);
+            this.updateConnectionStatus(gameState.getProvider());
             return;
         }
         this.toggleAvatarSelect(true);
@@ -212,7 +228,7 @@ export class WalletScene extends Phaser.Scene {
 
     async onOfflineClick(button: Phaser.Physics.Arcade.Sprite) {
         console.log('click offline', button);
-        if (this.offline) {
+        if (gameState.isOffline()) {
             /*
             this.offline = false;
             this.makePlayerButtonInteractive(this.sprites.playerButton);
@@ -233,11 +249,11 @@ export class WalletScene extends Phaser.Scene {
         this.sprites.wallet.setFrame(BUTTON_FRAMES.INACTIVE);
         this.sprites.playerButton.setFrame(BUTTON_FRAMES.INACTIVE);
         this.sprites.offlineButton.setFrame(BUTTON_FRAMES.CONNECTED);
-        this.offline = true;
+        gameState.setOffline(true);
     }
 
     onOver() {
-        if (!this.connected) {
+        if (!gameState.isConnected()) {
             this.sprites.tooltip = this.add.sprite(-1000, -1000, 'ui', 'tiles/tooltip/top-right-gold');
             const { wallet, tooltip } = this.sprites;
             const tX = wallet.x - tooltip.width + 30;
@@ -253,7 +269,7 @@ export class WalletScene extends Phaser.Scene {
     }
 
     onPlayerOver(button: Phaser.GameObjects.Sprite) {
-        if (this.connected && !this.currentAvatar) {
+        if (!gameState.isConnected() && !gameState.getCurrentAvatar()) {
             this.sprites.tooltip = this.add.sprite(-1000, -1000, 'ui', 'tiles/tooltip/top-left-gold');
             const { playerButton, tooltip } = this.sprites;
             const tX = playerButton.x + tooltip.width / 3 * 1.25;
@@ -269,7 +285,7 @@ export class WalletScene extends Phaser.Scene {
     }
 
     onOfflineOver(button: Phaser.GameObjects.Sprite) {
-        if (!this.currentAvatar) {
+        if (!gameState.getCurrentAvatar()) {
             this.sprites.tooltip = this.add.sprite(-1000, -1000, 'ui', 'tiles/tooltip/top-left-gold');
             const { offlineButton, tooltip } = this.sprites;
             const tX = offlineButton.x + tooltip.width / 3 * 1.6;
@@ -298,25 +314,28 @@ export class WalletScene extends Phaser.Scene {
     }
 
     updateConnectionStatus(prov: any) {
-        const provider = prov || this.provider;
+        const provider = gameState.getProvider();
         if (!provider) {
-            this.connected = false;
+            gameState.setConnected(false);
             this.sprites.wallet.setFrame(BUTTON_FRAMES.INACTIVE);
             return false;
         }
         console.log('connected', provider);
         this.sprites.wallet.setFrame(BUTTON_FRAMES.CONNECTED);
-        this.connected = true;
-        this.provider = provider;
+        gameState.setConnected(true);
+        gameState.setProvider(provider);
 
         // attempt to retrieve board state as soon as wallet is 
         // successfully connected
-        if (!this.board.contract && !this.retrievingBoardState) {
-            this.retrievingBoardState = true;
-            getBoardContract(this.provider).then(b => {
+        const board = gameState.getBoard();
+        if (!board?.contract && !gameState.isRetrievingBoard()) {
+            gameState.setRetrievingBoard(true);
+            console.log('retrieving board');
+            getBoardContract(gameState.getProvider()).then(b => {
                 console.log('retrieved board contract');
-                this.board.contract = b;
-                this.retrievingBoardState = false;
+                const currBoard = gameState.getBoard();
+                gameState.setBoard({...currBoard, contract: b});
+                gameState.setRetrievingBoard(false);
             });
         }
 
@@ -324,13 +343,13 @@ export class WalletScene extends Phaser.Scene {
         provider.listAccounts().then((accounts: string[]) => {
             if (!accounts) {
                 console.log('No addresses, cannot find NFTs');
-                this.currentAvatar = null;
+                gameState.setCurrentAvatar(null);
             } else {
                 const account = accounts[0];
-                this.account = account;
+                gameState.setAccount(account);
                 this.updateOwnedAvatars(provider, account);
             }
-            if (this.currentAvatar) {
+            if (gameState.getCurrentAvatar()) {
                 // for now, this will be a terminal state until page refresh
                 // you won't be able to switch avatars until your next game
                 this.sprites.wallet.removeInteractive();
@@ -349,36 +368,16 @@ export class WalletScene extends Phaser.Scene {
     setAvatar(avatar: Avatar, index: number) {
         console.log('Avatar selected', avatar, index);
         const width = this.scale.width;
-        this.currentAvatar = [avatar, index];
+        gameState.setCurrentAvatar([avatar, index]);
         this.toggleAvatarSelect(false);
-        this.avatarButtonImage = this.add.image(width - 150, 50, 'scientist');
-        this.updateConnectionStatus(this.provider);
+        gameState.setAvatarButtonImage(this.add.image(width - 150, 50, 'scientist'));
+        this.updateConnectionStatus(gameState.getProvider());
     }
 
     updateOwnedAvatars(provider: any, account: Address) {
-        const that = this;
         const setAvatar = this.setAvatar.bind(this);
-        const addAvatar = (avatar: Avatar, index: number) => {
-            console.log('addAvatar', avatar, index);
-            const raw = JSON.stringify(avatar);
-            const ix = that.avatars.findIndex(a => JSON.stringify(a) === raw);
-            if (ix === -1) {
-                console.log('added avatar', avatar);
-                const avatarsElt = document.getElementById("avatar-list");
-                that.avatars.push(avatar);
-                const key = `avatar-${avatar.id}`;
-                if (!document.getElementById(key)) {
-                    const choice = makeAvatarChoice(avatar, index, key, setAvatar);
-                    console.log('adding', choice);
-                    avatarsElt?.appendChild(choice);
-                }
-            } else {
-                console.log('updated avatar', avatar);
-                that.avatars[ix] = avatar;
-            }
-        };
         getOwnedAvatars(provider, account).then((avatars) => {
-            avatars.forEach(addAvatar);
+            avatars.forEach((a: Avatar, ix: number) => addAvatar(a, ix, setAvatar));
         });
     }
 
@@ -387,13 +386,13 @@ export class WalletScene extends Phaser.Scene {
         this.sprites.wallet.setFrame(BUTTON_FRAMES.INACTIVE);
         this.sprites.playerButton.setFrame(BUTTON_FRAMES.INACTIVE);
         this.emitters.player.stop();
-        if (this.provider != null && this.connected) {
+        if (gameState.getProvider() != null && gameState.isConnected()) {
             // If the cached provider is not cleared,
             // WalletConnect will default to the existing session
             // and does not allow to re-scan the QR code with a new wallet.
             web3Modal.clearCachedProvider();
         }
-        this.connected = false;
+        gameState.setConnected(false);
         this.emitters.wallet.start();
     }
 }

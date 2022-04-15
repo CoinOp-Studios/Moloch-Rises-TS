@@ -9,10 +9,10 @@ import { getPublicUrl } from '../assets/helpers';
 import * as constants from '../constants';
 import { NUM_ENEMIES, TILEHEIGHT, TILEWIDTH } from '../constants';
 import { completeBoard, startBoard } from '../contractAbi'
+import gameState from '../gameState';
 import { BoardMeta } from '../types';
 import { VrfProvider } from '../vrfProvider';
 import { GameScene } from './gameScene';
-import { WalletScene } from './walletScene';
 
 const GAME_MODE = Object.freeze({ OFFLINE: 1, ONLINE:2 });
 const COLLISION_INDEX_START = 54;
@@ -202,8 +202,8 @@ export class LabScene extends GameScene {
             return; 
         }
         console.log("starting game on-chain");
-        const avatarId = this.avatar?.id;
-        startBoard(this.provider, this.board, avatarId).then(
+        const avatarId = gameState.getCurrentAvatar()?.id;
+        startBoard(gameState.getProvider(), gameState.getBoard(), avatarId).then(
             (results) => {
                 if (results) {
                     const [gameId, gameData] = results;
@@ -214,7 +214,6 @@ export class LabScene extends GameScene {
                     this.vrfProvider?.setSeed(this.gameData.seed);
                 }
             });
-
     }
 
     endGame() {
@@ -222,7 +221,7 @@ export class LabScene extends GameScene {
         if (this.gameMode === GAME_MODE.OFFLINE)
             return; 
 
-        completeBoard(this.provider, this.board, this.gameId, this.gameData);
+        completeBoard(gameState.getProvider(), gameState.getBoard(), this.gameId, this.gameData);
     }
 
     endGameIfOver(allEnemiesDead: boolean) {
@@ -357,27 +356,23 @@ export class LabScene extends GameScene {
             return true;
 
         let initialized = false;
-        // check via the scene manager if the user has connected to the wallet scene
-        const walletScene = this.scene.manager.getScene('wallet') as WalletScene;
 
         // check if the user has either opted for offline play, or connected a wallet and avatar
-        if (walletScene.provider !== null && walletScene.currentAvatar !== null && walletScene.board !== null) {
-            this.provider = walletScene.provider;
-            this.avatar = walletScene.currentAvatar;
-            this.board = walletScene.board;
+        const provider = gameState.getProvider();
+        const currentAvatar = gameState.getCurrentAvatar();
+        const board = gameState.getBoard();
+        if (provider && currentAvatar && board) {
             this.gameMode = GAME_MODE.ONLINE;
             initialized = true;
         }
-        else if (walletScene.offline) {
-            this.avatar = this.getOfflineAvatar();
-            this.board = this.getOfflineBoard();
+        else if (gameState.isOffline()) {
             this.gameMode = GAME_MODE.OFFLINE;
             initialized = true;
         }
 
-        if (initialized && this.avatar) {
-            this.initGameStateFromBoard(this.board);
-            this.player?.initStatsFromAvatar(this.avatar);
+        if (initialized && currentAvatar) {
+            this.initGameStateFromBoard(board);
+            this.player?.initStatsFromAvatar(currentAvatar);
         }
 
         return initialized;
