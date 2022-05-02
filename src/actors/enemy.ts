@@ -47,24 +47,21 @@ export default class Enemy extends Character implements EnemyActor {
         const attackPlayer = player.tileX() === nextX && player.tileY() === nextY;
 
         // this mixes previous (position) and next (attack) turns
-        const moveHistory: MoveList = (this.scene as any);
-        moveHistory.push([this.tileX(), this.tileY(), attackPlayer]);
+        // const moveHistory: MoveList = (this.scene as any);
+        // moveHistory.push([this.tileX(), this.tileY(), attackPlayer]);
 
         if (attackPlayer) {
             this.attack(player);
             return;
         }
 
-        this.pathfinder.stopAvoidingAdditionalPoint(this.tileX(), this.tileY());
+        const shouldMove = this.tileX() !== nextX || this.tileY() !== nextY;
 
-        if (nextX === undefined || nextY === undefined) {
-            const shouldMove = this.tileX() !== nextX || this.tileY() !== nextY;
-            if (shouldMove) {
-                super.moveTileXY(nextX as number, nextY as number);
-            }
+        if (shouldMove) {
+            this.pathfinder.stopAvoidingAdditionalPoint(this.tileX(), this.tileY());
+            super.moveTileXY(nextX as number, nextY as number);
+            this.pathfinder.avoidAdditionalPoint(this.tileX(), this.tileY());
         }
-
-        this.pathfinder.avoidAdditionalPoint(this.tileX(), this.tileY());
     } 
 
     initOfflineStats() {

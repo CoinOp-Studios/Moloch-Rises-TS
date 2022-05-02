@@ -199,14 +199,17 @@ export default abstract class Character extends Phaser.Physics.Arcade.Sprite imp
     // animates a random dialogue choice in the supplied category
     animateDialogue(dialogueName: string): void {
         if (this.currentDialogue == null) {
-            var dialogueCategory = this.dialogue[dialogueName];
-            var dialogueToDisplay = dialogueCategory[Math.floor(Math.random() * dialogueCategory.length)];
-            var dialogue = this.animateText(dialogueToDisplay, this.x - TILEWIDTH / 2, this.y, "#000000");
-            this.currentAnimations['dialogue'] = dialogue;
-        }
-        else {
             console.log("%s: current dialogue not null", this.getName());
+            return;
         }
+        if (this.dialogue[dialogueName] === undefined) {
+            console.log("%s: dialgoue category %s is empty", this.getName(), dialogueName);
+            return;
+        }
+        var dialogueCategory = this.dialogue[dialogueName];
+        var dialogueToDisplay = dialogueCategory[Math.floor(Math.random() * dialogueCategory.length)];
+        var dialogue = this.animateText(dialogueToDisplay, this.x - TILEWIDTH / 2, this.y, "#000000");
+        this.currentAnimations['dialogue'] = dialogue;
     }
 
     animateDamage(received: number, blocked: number): void {

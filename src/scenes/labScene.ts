@@ -10,7 +10,7 @@ import * as constants from '../constants';
 import { NUM_ENEMIES, TILEHEIGHT, TILEWIDTH } from '../constants';
 import { completeBoard, startBoard } from '../contractAbi'
 import gameState from '../gameState';
-import { BoardMeta } from '../types';
+import { Avatar, BoardMeta } from '../types';
 import { VrfProvider } from '../vrfProvider';
 import { GameScene } from './gameScene';
 
@@ -171,7 +171,11 @@ export class LabScene extends GameScene {
         }
 
         // update enemies 
-        const allEnemiesDead = this.enemies.every(enemy => enemy.isDead());
+        let allEnemiesDead = true;
+        this.enemies.forEach(enemy => {
+            enemy.update(input != constants.INPUT.NONE);
+            allEnemiesDead = allEnemiesDead && enemy.isDead();
+        });
         this.endGameIfOver(allEnemiesDead);
     }
 
@@ -304,7 +308,8 @@ export class LabScene extends GameScene {
     }
 
     doesTileIDCollide(index: number): boolean {
-        return this.map?.tilesets[0]?.tileProperties.hasOwnProperty(index + 1) || true;
+        const tileIndexCollides =  this.map?.tilesets[0]?.tileProperties.hasOwnProperty(index + 1);
+        return tileIndexCollides != null && tileIndexCollides;
     }
 
     buildPathfindingGrid() {
@@ -358,8 +363,8 @@ export class LabScene extends GameScene {
         let initialized = false;
 
         // check if the user has either opted for offline play, or connected a wallet and avatar
+        let currentAvatar = gameState.getCurrentAvatar();
         const provider = gameState.getProvider();
-        const currentAvatar = gameState.getCurrentAvatar();
         const board = gameState.getBoard();
         if (provider && currentAvatar && board) {
             this.gameMode = GAME_MODE.ONLINE;
@@ -367,12 +372,15 @@ export class LabScene extends GameScene {
         }
         else if (gameState.isOffline()) {
             this.gameMode = GAME_MODE.OFFLINE;
+            currentAvatar = this.getOfflineAvatar();
             initialized = true;
         }
 
-        if (initialized && currentAvatar) {
+        if (initialized) {
             this.initGameStateFromBoard(board);
-            this.player?.initStatsFromAvatar(currentAvatar);
+            if (currentAvatar) {
+                this.player?.initStatsFromAvatar(currentAvatar);
+            }
         }
 
         return initialized;
@@ -399,10 +407,10 @@ export class LabScene extends GameScene {
             this.turnsRemaining = 50;
     }
 
-    getOfflineAvatar() {
+    getOfflineAvatar(): Avatar {
         return JSON.parse(
             '[{"id":"0x0","fields":{"name":"Alcibiades","description":"An avatar ready to fight moloch.","image":"ipfs://bafkreib4ftqeobfmdy7kvurixv55m7nqtvwj3o2hw3clsyo3hjpxwo3sda","attributes":[{"trait_type":"HP","value":3},{"trait_type":"AP","value":1},{"trait_type":"DP","value":0},{"trait_type":"Armor","value":"Worn Lab Coat"},{"trait_type":"Weapon","value":"Used Plasma Cutter"},{"trait_type":"Implant","value":"No Implant"},{"trait_type":"Experience","value":0}]}},0]'
-        );
+        )[0];
     }
 
     getOfflineBoard() {
