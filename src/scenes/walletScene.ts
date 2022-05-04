@@ -313,8 +313,7 @@ export class WalletScene extends Phaser.Scene {
         this.destroyTooltip();
     }
 
-    updateConnectionStatus(prov: any) {
-        const provider = gameState.getProvider();
+    updateConnectionStatus(provider: any) {
         if (!provider) {
             gameState.setConnected(false);
             this.sprites.wallet.setFrame(BUTTON_FRAMES.INACTIVE);
