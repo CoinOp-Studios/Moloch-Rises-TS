@@ -20,7 +20,7 @@ const BAR_SCALE = 0.8;
 
 console.log(`BUTTON_FRAMES: ${JSON.stringify(BUTTON_FRAMES)}`);
 
-const addAvatar = (avatar: Avatar, index: number, setAvatar: (avatar: any, index: number) => void) => {
+const addAvatar = (avatar: Avatar, index: number, setAvatar: (avatar: any) => void) => {
     console.log('addAvatar', avatar, index);
     const raw = JSON.stringify(avatar);
     const avatars = gameState.getAvatars();
@@ -42,7 +42,7 @@ const addAvatar = (avatar: Avatar, index: number, setAvatar: (avatar: any, index
     gameState.setAvatars(avatars);
 };
 
-const makeAvatarChoice = (avatar: any, index: number, key: string, callback: (avatar: any, index: number) => void) => {
+const makeAvatarChoice = (avatar: any, index: number, key: string, callback: (avatar: any) => void) => {
     const choice = document.createElement('li');
     choice.id = key;
     const cid = avatar.fields.image.split('/').pop();
@@ -50,7 +50,7 @@ const makeAvatarChoice = (avatar: any, index: number, key: string, callback: (av
     console.log('image', image, avatar.fields.image);
     choice.innerHTML = `<img src="${image}" height="256" width="256" />`;
     choice.addEventListener('click', () => {
-        callback(avatar, index);
+        callback(avatar);
     });
     return choice;
 }
@@ -364,10 +364,10 @@ export class WalletScene extends Phaser.Scene {
         return true;
     }
 
-    setAvatar(avatar: Avatar, index: number) {
-        console.log('Avatar selected', avatar, index);
+    setAvatar(avatar: Avatar) {
+        console.log('Avatar selected', avatar);
         const width = this.scale.width;
-        gameState.setCurrentAvatar([avatar, index]);
+        gameState.setCurrentAvatar(avatar);
         this.toggleAvatarSelect(false);
         gameState.setAvatarButtonImage(this.add.image(width - 150, 50, 'scientist'));
         this.updateConnectionStatus(gameState.getProvider());

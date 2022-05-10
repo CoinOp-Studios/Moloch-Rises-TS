@@ -6,26 +6,28 @@ import { BLOCK_CONFIRMS } from "../constants";
 import { avatar } from './avatar';
 import { board } from './board';
 import { getTokens } from './queries';
+import { Address, BoardMeta } from '../types';
 
-export async function getAvatarContract(provider) {
+
+export async function getAvatarContract(provider: any) {
   const network = await provider.getNetwork();
   const chainId = `0x${network.chainId.toString(16)}`;
   return new ethers.Contract(AVATAR_CONTRACTS[chainId], avatar.abi, provider);
 }
 
-export async function getBoardContract(provider) {
+export async function getBoardContract(provider: any) {
   const network = await provider.getNetwork();
   const chainId = `0x${network.chainId.toString(16)}`;
   return new ethers.Contract(BOARD_CONTRACTS[chainId], board.abi, provider);
 }
 
-export async function getOwnedAvatars(provider, address) {
+export async function getOwnedAvatars(provider: any, address: Address) {
   const avatars = await getTokens(provider, address);
   console.log(`getOwnedAvatars(${address}) =>`, avatars);
   return avatars;
 }
 
-export async function mintAvatar(provider, address) {
+export async function mintAvatar(provider: any, address: Address) {
   const contract = await getAvatarContract(provider);
   const signer = provider.getSigner(0);
   const gwei = parseEther('0.001');
@@ -38,13 +40,17 @@ export async function mintAvatar(provider, address) {
 }
 
 let waitingForStartBoard = false;
-export async function startBoard(provider, boardContract, avatarId) {
+export async function startBoard(provider: any, board: BoardMeta, avatarId: number) {
   // start game with selected avatar
   const signer = provider.getSigner(0);
   const gwei = parseEther('0.001');
-
+  
+  if(!board.contract) {
+    console.log('contract is not defined for board. game is in offline mode');
+    return;
+  }
   // perform call before transaction to check for errors
-  await boardContract.callStatic.start(avatarId, {
+  await board.contract.callStatic.start(avatarId, {
     value: gwei
   }).then((result) => {
     console.log("contract start call ok: ", result);
@@ -59,23 +65,28 @@ export async function startBoard(provider, boardContract, avatarId) {
 
   if (!waitingForStartBoard) {
     waitingForStartBoard = true;
-    const tx = await boardContract.connect(signer).start(avatarId, {
+    const tx = await board.contract.connect(signer).start(avatarId, {
       value: gwei
     });
     var rc = await tx.wait(BLOCK_CONFIRMS);
     console.log("game started on-chain for avatar %d in tx ", avatarId, rc);
 
     // retrieve game data for this avatar
-    const gameId = boardContract.avatarGame(avatarId);
+    const gameId = board.contract.avatarGame(avatarId);
     waitingForStartBoard = false;
-    return [gameId, boardContract.gameInfo(gameId)];
+    return [gameId, board.contract.gameInfo(gameId)];
   }
 }
 
 let waitingForCompleteBoard = false;
-export async function completeBoard(provider, boardContract, gameId, gameData) {
+export async function completeBoard(provider: any, board: BoardMeta, gameId: number, gameData: any) {
   const signer = provider.getSigner(0);
-  boardContract.callStatic.complete(gameId, gameData)
+  if(!board.contract) {
+    console.log('contract is not defined for board. game is in offline mode');
+    return;
+  }
+
+  board.contract.callStatic.complete(gameId, gameData)
     .then((result) => {
       console.log("contract complete call ok:", result);
     }, (error) => {
@@ -85,7 +96,7 @@ export async function completeBoard(provider, boardContract, gameId, gameData) {
 
   if (!waitingForCompleteBoard) {
     waitingForCompleteBoard = true;
-    var tx = await boardContract.connect(signer).complete(gameId, gameData);
+    var tx = await board.contract.connect(signer).complete(gameId, gameData);
     var rc = await tx.wait(BLOCK_CONFIRMS);
     console.log("game completed on-chain for game %d, info %s, in rc %s", gameId, gameData, rc);
     waitingForCompleteBoard = false;
