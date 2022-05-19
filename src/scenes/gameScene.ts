@@ -20,8 +20,8 @@ export class GameScene extends Phaser.Scene {
   showDebug = false;
 
   // game lifecycle
-  gameData: Record<string, any> = {};
-  gameId = '';
+  gameData: Record<string, any> | null = null;
+  gameId: number = 0;
   gameMode: number = 0;
   gameStarted = false;
   gameOver = false;

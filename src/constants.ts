@@ -21,3 +21,4 @@ export const BLOCK_CONFIRMS: number = 5;
 export const GAME_COST_ETHER: number = 0.001;
 export const MINT_COST_ETHER: number = 0.001;
 export const INPUT = Object.freeze({ UP: 1, RIGHT: 2, DOWN: 3, LEFT: 4, SPACE: 5, NONE: 6 });
+export const GAME_ALREADY_STARTED_ERROR_MESSAGE = "Player already in game";

@@ -42,7 +42,7 @@ export async function getTokens(provider, address) {
   }
 }
 `;
-  const data = await request(endpoint, query, { owner: address });
+  const data = await request(endpoint, query, { owner: address.toLowerCase() });
   console.log('data', data);
   const avatars = data.tokens.map(token => {
     const uri = token.uri || "";
