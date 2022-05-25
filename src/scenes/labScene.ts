@@ -262,10 +262,11 @@ export class LabScene extends GameScene {
             this.animateVictory();
             
             if (this.gameMode === GAME_MODE.ONLINE && this.gameData != null) {
-                this.gameData.completed = true;
-                this.gameData.victory = true;
+                let completedGameData = { ...this.gameData }
+                completedGameData.completed = true;
+                completedGameData.victory = true;
                 // submit result + end game
-                completeBoard(gameState.getProvider(), gameState.getBoard(), this.gameId, this.gameData).then(
+                completeBoard(gameState.getProvider(), gameState.getBoard(), this.gameId, completedGameData).then(
                     boardCompletionHandler
                 );
                 // claim NFT
@@ -274,10 +275,11 @@ export class LabScene extends GameScene {
             this.animateDefeat(turnsExpired);
 
             if (this.gameMode === GAME_MODE.ONLINE && this.gameData != null) {
-                this.gameData.completed = true;
-                this.gameData.victory = false;
-                this.gameData.resign = turnsExpired;
-                completeBoard(gameState.getProvider(), gameState.getBoard(), this.gameId, this.gameData).then(
+                let completedGameData = { ...this.gameData }
+                completedGameData.completed = true;
+                completedGameData.victory = false;
+                completedGameData.resign = turnsExpired;
+                completeBoard(gameState.getProvider(), gameState.getBoard(), this.gameId, completedGameData).then(
                     boardCompletionHandler
                 );
 
