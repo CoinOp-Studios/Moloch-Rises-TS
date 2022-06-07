@@ -1,43 +1,213 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
   <head>
-    <meta charset="utf-8" />
-    <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="#000000" />
-    <meta
-      name="description"
-      content="Web site created using create-react-app"
-    />
-    <link rel="apple-touch-icon" href="%PUBLIC_URL%/logo192.png" />
-    <!--
-      manifest.json provides metadata used when your web app is installed on a
-      user's mobile device or desktop. See https://developers.google.com/web/fundamentals/web-app-manifest/
-    -->
-    <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
-    <!--
-      Notice the use of %PUBLIC_URL% in the tags above.
-      It will be replaced with the URL of the `public` folder during the build.
-      Only files inside the `public` folder can be referenced from the HTML.
-
-      Unlike "/favicon.ico" or "favicon.ico", "%PUBLIC_URL%/favicon.ico" will
-      work correctly both with client-side routing and a non-root public URL.
-      Learn how to configure a non-root public URL by running `npm run build`.
-    -->
-    <title>React App</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="author" content="CoinOpSTudios">
   </head>
-  <body>
-    <noscript>You need to enable JavaScript to run this app.</noscript>
-    <div id="root"></div>
-    <!--
-      This HTML file is a template.
-      If you open it directly in the browser, you will see an empty page.
-
-      You can add webfonts, meta tags, or analytics to this file.
-      The build step will place the bundled scripts into the <body> tag.
-
-      To begin the development, run `npm start` or `yarn start`.
-      To create a production bundle, use `npm run build` or `yarn build`.
-    -->
+  <body class="dark">
+    <div class="bg-slate-200 dark:bg-slate-800 text-black dark:text-white">
+      <div class="container mx-auto">
+        <header class="mb-auto font-head text-3xl text-raid-red mx-8 pt-8">
+          Moloch Rises
+        </header>
+        <div 
+          id="avatar-select" 
+          class="modal fade fixed top-0 left-0 hidden w-full h-full outline-none overflow-x-hidden overflow-y-auto"
+          tabindex="-1"
+          aria-labelledby="exampleModalScrollableLabel"
+          aria-hidden="true"
+        >
+          <div class="modal-dialog modal-dialog-scrollable relative w-1/2 pointer-events-none items-center dark:bg-slate-800 opacity-75">
+            <div
+              class="modal-content border-none shadow-lg relative flex flex-col w-full pointer-events-auto bg-clip-padding rounded-md outline-none text-current">
+              <div class="modal-body relative p-4">
+                <div id="avatars-owned">
+                  <h2 class="text-raid-red text-2xl">Your Avatars</h2>
+                  <p class="text-md text-italic">Click to select</p>
+                  <ul id="avatar-list" class="pl-4"></ul>
+                </div>
+              </div>
+              <div
+                class="modal-footer flex flex-shrink-0 flex-wrap items-center justify-end p-4 border-t border-gray-200 rounded-b-md">
+                <button 
+                  type="button" 
+                  id="avatar-mint"
+                  class="inline-block px-6 py-2.5 bg-purple-600 text-white font-medium text-xs leading-tight uppercase rounded shadow-md hover:bg-purple-700 hover:shadow-lg focus:bg-purple-700 focus:shadow-lg focus:outline-none focus:ring-0 active:bg-purple-800 active:shadow-lg transition duration-150 ease-in-out"
+                >
+                  Mint New Avatar
+                </button>
+                <button 
+                  type="button" 
+                  id="avatar-select-close"
+                  class="inline-block px-6 py-2.5 bg-purple-600 text-white font-medium text-xs leading-tight uppercase rounded shadow-md hover:bg-purple-700 hover:shadow-lg focus:bg-purple-700 focus:shadow-lg focus:outline-none focus:ring-0 active:bg-purple-800 active:shadow-lg transition duration-150 ease-in-out"
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div id="wallet" role="main" class="content-center mx-8 pt-1 w-full"></div>
+          <div id="game" role="main" class="content-center mx-8 pt-0 w-full"></div>
+          <div class="flex flex-row flex-wrap mx-8 py-0">
+            <aside class="w-full sm:w-1/3 md:w-1/4 px-2">
+                <div class="sticky top-0 p-4 w-full">
+                    <h3 class="text-lg">Navigation</h3>
+                    <ul class="flex flex-col overflow-hidden">
+                      <li class="hover:text-raid-red"><span class="text-raid-red">&zigrarr;</span> <a href="#game">Game</a></li>
+                      <li class="hover:text-raid-red"><span class="text-raid-red">&zigrarr;</span> <a href="#about">About</a></li>
+                      <li class="hover:text-raid-red"><span class="text-raid-red">&zigrarr;</span> <a href="#gameplay">Gameplay</a></li>
+                      <li class="hover:text-raid-red"><span class="text-raid-red">&zigrarr;</span> <a href="#characters">Characters</a></li>
+                      <li class="hover:text-raid-red"><span class="text-raid-red">&zigrarr;</span> <a href="#equipping">Equipping</a></li>
+                      <li class="hover:text-raid-red"><span class="text-raid-red">&zigrarr;</span> <a href="#stakes">Losing Items</a></li>
+                      <li class="hover:text-raid-red"><span class="text-raid-red">&zigrarr;</span> <a href="#controls">Controls</a></li>
+                      <li class="hover:text-raid-red"><span class="text-raid-red">&zigrarr;</span> <a href="#Project">Project Details</a></li>
+                    </ul>
+                </div>  
+            </aside>
+            <main role="main" class="md:w-3/4 pt-4 px-2 sm:w-2/3 w-full">
+              <h2 id="about" class="text-xl font-serif text-raid-red">
+                Welcome To Moloch Rises
+              </h2>
+              <p class="italic bold pb-4">
+                <span class="text-raid-red">&zigrarr;</span>
+                Please note, this is a hackathon project, and it not yet fully
+                released.  You could lose the MATIC you use to play the game,
+                but you'll probably have fun anyway.
+              </p>
+              <p>
+                Humanity is about to achieve utopia. XYZ Industries has 
+                developed the ultimate AI to streamline human collaboration.
+              </p>
+              <p>
+                During the final stage of testing before public release, 
+                the spirit of Moloch inhabits the AI and corrupts it.
+              </p>
+              <p>
+                This corrupted AI quickly takes over every robot in the lab 
+                and tries to escape into the world to cause chaos.
+              </p>
+              <p>
+                Destroy all 3 of these “Moloch Bots” to protect the future 
+                of humanity.
+              </p>
+              <h2 id="gameplay" class="text-xl font-serif text-raid-red pt-6">
+                How To Play
+              </h2>
+              <h3 class="text-lg font-serif">
+                Play For Free
+              </h3>
+              <p>
+                Moloch Rises can be played
+                for free and without connecting a wallet, but you cannot keep
+                any of the NFT characters or items you acquire.
+              </p>
+              <h3 class="text-lg font-serif pt-6">
+                Play For Real
+              </h3> 
+              <p>
+                If you connect your wallet and pay 5 MATIC (0.001 on testnet), you will be able 
+                to keep your character NFTs and any item NFTs you acquire.
+              </p>
+              <p>
+                When you die, you will need to start the level again and pay
+                1 MATIC (0.001 on testnet) to continue playing until you die again.
+              </p>
+              <h3 class="text-lg font-serif pt-6 text-raid-red">
+                How To Connect Your Wallet
+              </h3>
+              <p>
+                If you choose to connect your wallet,
+                you will have 2 transactions during the game (once at the
+                beginning, and once at the end).
+              </p>
+              <h2 id="characters" class="text-lg font-serif pt-6 text-raid-red">
+                Selecting Your Character
+              </h2>
+              <p>
+                On the top right, there are two buttons.  The right button
+                connects your wallet.  The left button selects or mints or 
+                character.
+              </p>
+              <p>
+                Before starting gameplay, you will be able to select your
+                playable NFT character. If you connect your wallet and pay to
+                play, you will be able to keep your character as an NFT along
+                with any experience points they build up.
+              </p>
+              <p>
+                As you acquire more characters, you will be able to choose from 
+                your leveled up character collection (via gameplay or secondary
+                market), or a brand new character.
+              </p>
+              <h2 id="equipping" class="pt-6 text-raid-red">
+                Equipping Items
+              </h2>
+              <p>
+                After selecting your playable character, you will able to equip
+                any NFT item you have acquired during gameplay (or through 
+                purchase on a secondary market).
+              </p>
+              <h2 id="stakes" class="pt-6 text-raid-red">
+                Losing NFT Items
+              </h2>
+              <p>
+                When you die, you have a 10% chance of losing any equipped item
+                NFTs. Playing with an item makes the game easier, but you do 
+                have a chance of losing it if you die.
+              </p>
+              <h2 id="controls" class="pt-6 text-raid-red">
+                Controls
+              </h2>
+              <p>
+                Use the arrow keys to move around.
+              </p>
+              <p>
+                Use the spacebar to attack, but make sure you use the arrow
+                keys to select which direction you want to attack first.
+              </p>
+              <h2 id="project" class="pt-6 text-raid-red">
+                Project Details
+              </h2>
+              <p>
+                Moloch Rises is a project
+                created by CoinOpDAO during the ETH Denver 2022 Buidlathon.
+              </p>
+              <p>
+                For the 1-week hackathon, we created this proof of concept
+                with 1 playable map.
+              </p>
+              <p>Core Team at CoinOpDAO
+                <ul>
+                  <li>
+                    <span class="text-raid-red">&zigrarr;</span> launchninja
+                  </li>
+                  <li>
+                    <span class="text-raid-red">&zigrarr;</span> BruceDev
+                  </li>
+                  <li>
+                    <span class="text-raid-red">&zigrarr;</span> Alcibiades
+                  </li>
+                  <li>
+                    <span class="text-raid-red">&zigrarr;</span> flip
+                  </li>
+                </ul>
+              </p>
+          </main>
+      </div>
+      <footer class="flex mt-auto pt-6 text-center text-raid-red">
+          <div>
+            Moloch Rises v1
+          </div>
+          <div class="grow">
+            by CoinOpStudios
+          </div>
+          <div>
+            written for ETHDenver Hackathon 2022.
+          </div>
+      </footer>
+    </div>
+  </div>
   </body>
 </html>

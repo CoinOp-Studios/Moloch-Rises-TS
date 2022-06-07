@@ -1,7 +1,7 @@
 import { Contract } from "ethers";
 
 export type Address = string;
-export type AddressMap = Record<String, Address>;
+export type AddressMap = Record<string, Address>;
 export type Dialogs = Record<string, string[]>
 
 export type MoveList = Array<number, number, boolean>;

@@ -1,6 +1,7 @@
 import EasyStar from 'easystarjs';
 //import { AbiCoder } from 'ethers/lib/utils';
 import Phaser from 'phaser';
+import { threadId } from 'worker_threads';
 
 import Enemy from '../actors/enemy';
 import Player from '../actors/player';
@@ -8,7 +9,7 @@ import dialogue from '../assets/dialogue.json';
 import { getPublicUrl } from '../assets/helpers';
 import * as constants from '../constants';
 import { NUM_ENEMIES, TILEHEIGHT, TILEWIDTH } from '../constants';
-import { completeBoard, startBoard } from '../contractAbi'
+import { completeBoard, startAndRetrieveGame } from '../contractAbi'
 import gameState from '../gameState';
 import { Avatar, BoardMeta } from '../types';
 import { VrfProvider } from '../vrfProvider';
@@ -160,6 +161,10 @@ export class LabScene extends GameScene {
             this.startGame();
             this.gameStarted = true;
         }
+
+        if (this.gameOver) {
+            return;
+        }
  
         const input = this.gameOver ? constants.INPUT.NONE : this.getInput(time);
         
@@ -206,31 +211,28 @@ export class LabScene extends GameScene {
             return; 
         }
         console.log("starting game on-chain");
-        const avatarId = gameState.getCurrentAvatar()?.id;
-        startBoard(gameState.getProvider(), gameState.getBoard(), avatarId).then(
-            (results) => {
-                if (results) {
-                    const [gameId, gameData] = results;
-                    console.log("retrieved on-chain gameId: %s and gameData ", gameId, gameData);
-                    this.gameId = gameId;
-                    this.gameData = gameData;
-                    // TODO: get the seed from character sheet
-                    this.vrfProvider?.setSeed(this.gameData.seed);
+
+        if (this.gameData == null) {
+            const avatarId = gameState.getCurrentAvatar()?.id;
+            startAndRetrieveGame(gameState.getProvider(), gameState.getBoard(), avatarId).then(
+                (results) => {
+                    if (results) {
+                        const [gameId, gameData] = results;
+                        console.log("retrieved on-chain gameId: %s and gameData ", gameId, gameData);
+                        this.gameId = gameId;
+                        this.gameData = gameData;
+                        // TODO: get the seed from character sheet
+                        this.vrfProvider?.setSeed(this.gameData?.seed);
+                    }
                 }
-            });
-    }
-
-    endGame() {
-        console.log("ending game on-chain");
-        if (this.gameMode === GAME_MODE.OFFLINE)
-            return; 
-
-        completeBoard(gameState.getProvider(), gameState.getBoard(), this.gameId, this.gameData);
+            );
+        }
     }
 
     endGameIfOver(allEnemiesDead: boolean) {
         let terminal = false;
         let victory = false;
+        const turnsExpired = this.haveMaxTurnsElapsed();
 
         if (allEnemiesDead) {
             terminal = true;
@@ -240,7 +242,7 @@ export class LabScene extends GameScene {
             // animation
             terminal = true;
         }
-        else if (this.haveMaxTurnsElapsed()) {
+        else if (turnsExpired) {
             // animation
             terminal = true;
         }
@@ -249,30 +251,39 @@ export class LabScene extends GameScene {
             return false;
         
         this.gameOver = true;
-        
-        if (this.gameMode === GAME_MODE.OFFLINE) {
-            if (victory) {
-                this.animateVictory();
-                // dispaly a "here's what you *would* win prompt"
-            } else {
-                this.animateDefeat(this.haveMaxTurnsElapsed());
+
+        const boardCompletionHandler = function(results: any) {
+            if (results) {
+                console.log("completed game %s", results);
             }
-        }
-        if (this.gameMode === GAME_MODE.ONLINE) {
-            this.gameData.completed = true;
-            if (victory) {
-                this.gameData.victory = true;
+        };
+
+        if (victory) {
+            this.animateVictory();
+            
+            if (this.gameMode === GAME_MODE.ONLINE && this.gameData != null) {
+                let completedGameData = { ...this.gameData }
+                completedGameData.completed = true;
+                completedGameData.victory = true;
                 // submit result + end game
-
+                completeBoard(gameState.getProvider(), gameState.getBoard(), this.gameId, completedGameData).then(
+                    boardCompletionHandler
+                );
                 // claim NFT
+            }
+        } else {
+            this.animateDefeat(turnsExpired);
 
-                // submit ZK history
-            } else {
-                // update game state
-                this.gameData.victory = false;
-                this.gameData.resign = this.haveMaxTurnsElapsed();
-                this.animateDefeat(this.haveMaxTurnsElapsed());
+            if (this.gameMode === GAME_MODE.ONLINE && this.gameData != null) {
+                let completedGameData = { ...this.gameData }
+                completedGameData.completed = true;
+                completedGameData.victory = false;
+                completedGameData.resign = turnsExpired;
+                completeBoard(gameState.getProvider(), gameState.getBoard(), this.gameId, completedGameData).then(
+                    boardCompletionHandler
+                );
 
+                // TODO: damage equipped NFTs
                 // animate damage to equipped loot
                 this.animateLootDamage(1);
             }

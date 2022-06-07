@@ -33,14 +33,16 @@ export async function getTokens(provider, address) {
   const endpoint = GRAPH_ENDPOINTS[chainId];
   const query = gql`
  query UserTokens($owner: String!) {
-  tokens(owner: $owner) {
-    id,
-    owner,
+  tokens(where: {owner: $owner}) {
+    id
+    owner {
+      id
+    }
     uri
   }
 }
 `;
-  const data = await request(endpoint, query, { owner: address });
+  const data = await request(endpoint, query, { owner: address.toLowerCase() });
   console.log('data', data);
   const avatars = data.tokens.map(token => {
     const uri = token.uri || "";
