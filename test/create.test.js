@@ -8,7 +8,6 @@ const DEFAULT_PARAMS = {
   nonce: 1,
   board: 10008,
   positions: [4001, 8002],
-  facing: [1, 3],
   hp: [10, 10],
 };
 
@@ -18,8 +17,8 @@ describe("Create Circuit Tests", function () {
   let createCircuit;
 
   before(async () => {
-    const circuitFile = path.join(__dirname, "..", "circuits", "create.circom");
-    createCircuit = await tester(circuitFile, { output: "./circom" });
+    const circuitFile = path.join(__dirname, "..", "zk/circuits", "create_board.circom");
+    createCircuit = await tester(circuitFile, { output: "./zk/circom" });
   });
 
   it("Should setup on happy path", async () => {
