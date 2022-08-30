@@ -402,7 +402,7 @@ describe("Move Circuit Tests", () => {
         witness = w;
         return moveCircuit.checkConstraints(w);
       })
-      .then(() => {
+      .then(async () => {
         const playerPosition = witness[W_INDEX_OUT.PLAYER_XY];
         const opponentPosition = witness[W_INDEX_OUT.ENEMY_XY]; 
         const boardResult = witness[W_INDEX_OUT.BOARD_HASH]; // <-- new board hash, 5
@@ -411,14 +411,19 @@ describe("Move Circuit Tests", () => {
         assert.notEqual(boardHash, boardResult);
 
         // 1 added to player pos
-        moveCircuit.calculateWitness({
-          ...DEFAULT_PARAMS,
-          boardHash: boardResult,
-          positions: [playerPosition + 1n, opponentPosition],
-          move: 3,
-          turn: 1,
-        });
-        assert(false);
+        try { 
+          await moveCircuit.calculateWitness({
+            ...DEFAULT_PARAMS,
+            boardHash: boardResult,
+            positions: [playerPosition + 1n, opponentPosition],
+            move: 3,
+            turn: 1,
+          });
+          assert(false);
+        }
+        catch (err) {
+          assert(err.message.includes("Assert Failed"));
+        }
       }
     );
   });
