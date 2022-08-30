@@ -3,7 +3,7 @@ pragma circom 2.0.0;
 include "../../node_modules/circomlib/circuits/poseidon.circom";
 include "./util.circom";
 
-template HallMove() {
+template BoardMove() {
   signal input boardHash;
   signal input nonce;
   signal input board; // x * 1000 + y
@@ -66,4 +66,4 @@ template HallMove() {
   boardResult <== poseidon2.out;
 }
 
-component main = HallMove();
+component main = BoardMove();

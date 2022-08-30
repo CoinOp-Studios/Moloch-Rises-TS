@@ -2,7 +2,7 @@ pragma circom 2.0.0;
 
 include "../../node_modules/circomlib/circuits/poseidon.circom";
 
-template HallFightCreate2() {
+template BoardCreate() {
   signal input nonce;
   signal input board; // x * 1000 + y
   signal input positions[2]; // x * 1000 + y
@@ -34,4 +34,4 @@ template HallFightCreate2() {
   boardHash <-- poseidon.out;
 }
 
-component main = HallFightCreate2();
+component main = BoardCreate();
