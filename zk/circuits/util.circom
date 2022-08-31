@@ -54,76 +54,16 @@ template GetBigger(n) {
     out <== gs.out;
 }
 
-// adapated from dark forest https://github.com/darkforest-eth/circuits/blob/master/perlin/perlin.circom
-// NB: RangeProof is inclusive.
-// input: field element, whose abs is claimed to be <= than max_abs_value
-// output: none
-// also checks that both max and abs(in) are expressible in `bits` bits
-template RangeProof(bits) {
-    signal input in; 
-    signal input max_abs_value;
-
-    /* check that both max and abs(in) are expressible in `bits` bits  */
-    component n2b1 = Num2Bits(bits+1);
-    n2b1.in <== in + (1 << bits);
-    component n2b2 = Num2Bits(bits);
-    n2b2.in <== max_abs_value;
-
-    /* check that in + max is between 0 and 2*max */
-    component lowerBound = LessThan(bits+1);
-    component upperBound = LessThan(bits+1);
-
-    lowerBound.in[0] <== max_abs_value + in; 
-    lowerBound.in[1] <== 0;
-    lowerBound.out === 0;
-
-    upperBound.in[0] <== 2 * max_abs_value;
-    upperBound.in[1] <== max_abs_value + in; 
-    upperBound.out === 0;
-}
-
-// input: n field elements, whose abs are claimed to be less than max_abs_value
-// output: none
-template MultiRangeProof(n, bits) {
-    signal input in[n];
-    signal input max_abs_value;
-    component rangeProofs[n];
-
-    for (var i = 0; i < n; i++) {
-        rangeProofs[i] = RangeProof(bits);
-        rangeProofs[i].in <== in[i];
-        rangeProofs[i].max_abs_value <== max_abs_value;
-    }
-}
-
-// input: dividend and divisor field elements in [0, sqrt(p))
-// output: remainder and quotient field elements in [0, p-1] and [0, sqrt(p)
-template Modulo(divisor_bits, SQRT_P) {
+template Modulo() {
     signal input dividend;
     signal input divisor;
-    signal output remainder;
     signal output quotient;
+    signal output remainder;
 
-    signal output raw_remainder;
-    raw_remainder <-- dividend % divisor;
-    
-    remainder <-- raw_remainder;
-
-    quotient <-- (dividend - remainder) / divisor;
-
-    dividend === divisor * quotient + remainder;
-
-    component rp = MultiRangeProof(3, 128);
-    rp.in[0] <== divisor;
-    rp.in[1] <== quotient;
-    rp.in[2] <== dividend;
-    rp.max_abs_value <== SQRT_P;
-
-    // check that 0 <= remainder < divisor
-    component remainderUpper = LessThan(divisor_bits);
-    remainderUpper.in[0] <== remainder;
-    remainderUpper.in[1] <== divisor;
-    remainderUpper.out === 1;
+    // TODO: overflow
+    remainder <-- dividend % divisor;
+    quotient <-- dividend \ divisor; //where '\' is the integer division operator
+    dividend === quotient * divisor + remainder; //this works!
 }
 
 // adapting from Simple D6 - 3rd ed: https://i.4pcdn.org/tg/1372924544491.pdf
@@ -133,13 +73,13 @@ template RollSd6(num_dice, dice_sides) {
     signal output result;
     signal maxRoll[num_dice + 1];
     signal numMax[num_dice + 1]; 
-    signal roll[num_dice];
+    signal rolls[num_dice];
 
     component gb[num_dice];
     component eq[num_dice];
     component mux[num_dice];
     component poseidons[num_dice];
-    component mod[num_dice];
+    component mods[num_dice];
 
     // invalid access if this is not set
     maxRoll[0] <== 0;
@@ -152,14 +92,16 @@ template RollSd6(num_dice, dice_sides) {
         poseidons[i].inputs[0] <== seed + i;
         // MOD THE RESULT INTO THE DIE RANGE
         // assuming that no dies have more than 2 ^ 6 sides
-        mod[i] = Modulo(6, MAX_VALUE);
-        mod[i].dividend <== poseidons[i].out;
-        mod[i].divisor <== dice_sides; 
-        roll[i] <== 1 + mod[i].remainder; // returns [1 to dice sides]
+        mods[i] = Modulo();
+        mods[i].dividend <== poseidons[i].out;
+        mods[i].divisor <== dice_sides;
+        var roll = mods[i].remainder;
+        
+        rolls[i] <== 1 + roll; // returns [1 to dice sides]
 
         // UPDATE LARGEST ROLL
         gb[i] = GetBigger(6);
-        gb[i].in[0] <== roll[i];
+        gb[i].in[0] <== rolls[i];
         gb[i].in[1] <== maxRoll[i];
         maxRoll[i + 1] <== gb[i].out;
 
