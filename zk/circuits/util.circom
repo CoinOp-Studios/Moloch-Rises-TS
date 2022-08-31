@@ -99,19 +99,19 @@ template MultiRangeProof(n, bits) {
 // input: dividend and divisor field elements in [0, sqrt(p))
 // output: remainder and quotient field elements in [0, p-1] and [0, sqrt(p)
 template Modulo(divisor_bits, SQRT_P) {
-    signal input dividend; // -8
-    signal input divisor; // 5
-    signal output remainder; // 2
-    signal output quotient; // -2
+    signal input dividend;
+    signal input divisor;
+    signal output remainder;
+    signal output quotient;
 
     signal output raw_remainder;
     raw_remainder <-- dividend % divisor;
     
     remainder <-- raw_remainder;
 
-    quotient <-- (dividend - remainder) / divisor; // (-8 - 2) / 5 = -2.
+    quotient <-- (dividend - remainder) / divisor;
 
-    dividend === divisor * quotient + remainder; // -8 = 5 * -2 + 2.
+    dividend === divisor * quotient + remainder;
 
     component rp = MultiRangeProof(3, 128);
     rp.in[0] <== divisor;
