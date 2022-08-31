@@ -62,8 +62,8 @@ template Modulo() {
 
     // TODO: overflow
     remainder <-- dividend % divisor;
-    quotient <-- dividend \ divisor; //where '\' is the integer division operator
-    dividend === quotient * divisor + remainder; //this works!
+    quotient <-- dividend \ divisor; //integer division
+    dividend === quotient * divisor + remainder; 
 }
 
 // adapting from Simple D6 - 3rd ed: https://i.4pcdn.org/tg/1372924544491.pdf
