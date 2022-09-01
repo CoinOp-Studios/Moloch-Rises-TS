@@ -80,24 +80,4 @@ describe("Attack Circuit", function () {
       });
     });
   });
-
-  /*
-  it("Should fail with invalid starting location", async () => {
-    let errored = false;
-    return createCircuit
-      .calculateWitness({
-        ...DEFAULT_PARAMS,
-        positions: [11004, 8002],
-      })
-      .then((witness) => {
-        return createCircuit.checkConstraints(witness);
-      })
-      .catch((err) => {
-        errored = true;
-      })
-      .finally(() => {
-        assert(errored, "Should have errored");
-      });
-  });
-  */
 });
