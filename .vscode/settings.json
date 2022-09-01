@@ -1,0 +1,8 @@
+{
+    "[javascript][typescript][json][jsonc]": {
+        "editor.tabSize": 2
+    },
+    "[circom]": {
+        "editor.tabSize": 4
+    }
+}

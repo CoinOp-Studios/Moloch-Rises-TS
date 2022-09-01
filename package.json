@@ -13,17 +13,23 @@
     "@types/react": "^18.0.1",
     "@types/react-dom": "^18.0.0",
     "@walletconnect/web3-provider": "^1.7.7",
+    "chai": "^4.3.6",
+    "circom_tester": "^0.0.14",
+    "circomlib": "^2.0.5",
     "crypto-js": "^4.1.1",
     "easystarjs": "^0.4.4",
     "ethers": "^5.6.2",
+    "ffjavascript": "^0.2.55",
     "graphql": "^16.3.0",
     "graphql-request": "^4.2.0",
+    "mocha": "^10.0.0",
     "phaser": "^3.55.2",
     "react": "^18.0.0",
     "react-dom": "^18.0.0",
     "react-scripts": "4.0.1",
     "recursive-hash": "^1.1.1",
     "seeded-rand": "^2.0.1",
+    "snarkjs": "^0.4.25",
     "typescript": "^4.4.2",
     "web-vitals": "^2.1.0",
     "web3modal": "^1.9.6"
@@ -34,7 +40,8 @@
     "prebuild": "node scripts/make_hashes.js > src/assets/hashes.json",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "test-circuits": "mocha test"
   },
   "eslintConfig": {
     "extends": [
