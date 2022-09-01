@@ -11,6 +11,7 @@ template Attack() {
     signal input defenderHp;
     signal input defenderDef;
 
+    signal output dmgRaw;
     signal output defenderEndingHp;
 
     component poseidon = Poseidon(4);
@@ -27,12 +28,13 @@ template Attack() {
 
     // TODO: integrate atk, ap
     rollSd6.seed <== poseidon.out;
-    var dmg = rollSd6.result;
+    dmgRaw <== rollSd6.result;
     
-    gt.in[0] <== dmg;
+    // gt.out == dmgRaw > defenderDef
+    gt.in[0] <== dmgRaw;
     gt.in[1] <== defenderDef;
-    mux.c[0] <== defenderHp - dmg;
-    mux.c[1] <== defenderHp;
+    mux.c[0] <== defenderHp;
+    mux.c[1] <== defenderHp - dmgRaw;
     mux.s <== gt.out;
     defenderEndingHp <== mux.out;
 }
